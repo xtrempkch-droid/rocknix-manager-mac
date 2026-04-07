@@ -10,9 +10,18 @@ import sys
 from PyQt6.QtWidgets import QApplication, QStyleFactory
 
 import platform
-if platform.system() == "Darwin":  # Darwin é o kernel do macOS
-    # Ajustar caminhos de config ou drivers específicos
 
+# Se você não tiver nada para fazer especificamente no Mac ainda,
+# você pode usar 'pass' para não dar erro de indentação:
+if platform.system() == "Darwin":
+    pass  # Isso evita o erro de bloco vazio
+
+def main():
+    # Seu código principal aqui
+    print("Iniciando Rocknix Manager...")
+
+if __name__ == "__main__":
+    main()
 def main():
     app = QApplication(sys.argv)
     
