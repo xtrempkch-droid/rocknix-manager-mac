@@ -1,0 +1,18 @@
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r requirements.txt pyinstaller
+      - name: Build with PyInstaller
+        run: pyinstaller --windowed --icon=icon.icns rocknix_manager.py
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RocknixManager-macOS
+          path: dist/
