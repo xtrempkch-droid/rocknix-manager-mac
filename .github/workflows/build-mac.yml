@@ -1,4 +1,4 @@
-name: Build Rocknix Manager macOS with Icon
+name: Build Rocknix Manager macOS
 
 on:
   push:
@@ -20,39 +20,41 @@ jobs:
 
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install pyinstaller
+          # Instala requirements apenas se o arquivo existir no repo
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Create .icns from icon.png
+      - name: Generate macOS .icns from icon.png
         run: |
-          # Cria a estrutura de pastas necessária para o ícone do Mac
+          # Cria a estrutura de ícones em múltiplos tamanhos exigida pela Apple
           mkdir icon.iconset
           sips -z 16 16     icon.png --out icon.iconset/icon_16x16.png
           sips -z 32 32     icon.png --out icon.iconset/icon_16x16@2x.png
           sips -z 32 32     icon.png --out icon.iconset/icon_32x32.png
           sips -z 64 64     icon.png --out icon.iconset/icon_32x32@2x.png
           sips -z 128 128   icon.png --out icon.iconset/icon_128x128.png
-          sips -z 256 256   icon.iconset/icon_128x128.png --out icon.iconset/icon_128x128@2x.png
+          sips -z 256 256   icon.png --out icon.iconset/icon_128x128@2x.png
           sips -z 256 256   icon.png --out icon.iconset/icon_256x256.png
-          sips -z 512 512   icon.iconset/icon_256x256.png --out icon.iconset/icon_256x256@2x.png
+          sips -z 512 512   icon.png --out icon.iconset/icon_256x256@2x.png
           sips -z 512 512   icon.png --out icon.iconset/icon_512x512.png
-          cp icon.png icon.iconset/icon_512x512@2x.png
+          cp icon.png       icon.iconset/icon_512x512@2x.png
           
-          # Converte a pasta para o arquivo final .icns
+          # Comando nativo do Mac para converter a pasta em arquivo .icns
           iconutil -c icns icon.iconset
           rm -rf icon.iconset
 
       - name: Build with PyInstaller
         run: |
-          # --windowed: Interface gráfica sem terminal
-          # --icon: Aplica o ícone .icns gerado acima
-          # --onedir: Formato padrão recomendado para macOS
+          # --windowed: Interface gráfica (GUI)
+          # --onedir: Pasta de aplicativo (padrão Mac)
+          # --icon: Aplica o ícone gerado no passo anterior
           pyinstaller --windowed --onedir --clean \
             --name "RocknixManager" \
             --icon "icon.icns" \
             rocknix_manager.py
 
-      - name: Compress App
+      - name: Compress App for Distribution
         run: |
           cd dist
           zip -r RocknixManager-macOS.zip RocknixManager.app
