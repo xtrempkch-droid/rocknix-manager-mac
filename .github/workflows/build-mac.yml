@@ -1,0 +1,50 @@
+name: Build Rocknix Manager macOS
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch: # Permite rodar manualmente
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pyinstaller
+
+      - name: Build with PyInstaller
+        run: |
+          # --windowed: Não abre terminal ao iniciar o app
+          # --onefile: Empacota tudo em um único arquivo
+          # --noconfirm: Sobrescreve pastas de build anteriores
+          pyinstaller --windowed --onefile \
+            --name "RocknixManager-macOS" \
+            --clean \
+            rocknix_manager.py
+
+      - name: Create DMG (Opcional, mas recomendado)
+        run: |
+          # Cria um ZIP do aplicativo para distribuição rápida
+          cd dist
+          zip -r RocknixManager-macOS.zip RocknixManager-macOS.app
+          
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Rocknix-Manager-Mac
+          path: dist/RocknixManager-macOS.zip
