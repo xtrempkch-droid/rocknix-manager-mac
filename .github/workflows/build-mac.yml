@@ -1,13 +1,19 @@
-name: Build Rocknix Manager macOS
+name: Build and Release Rocknix Manager macOS
 
 on:
   push:
     branches: [ "main" ]
+    tags:
+      - 'v*' # O robô vai rodar e criar o release quando você criar uma tag tipo v1.0
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: macos-latest
+    
+    # PERMISSÃO NECESSÁRIA PARA O ROBÔ PUBLICAR NO RELEASE
+    permissions:
+      contents: write 
 
     steps:
       - name: Checkout repository
@@ -26,7 +32,6 @@ jobs:
 
       - name: Generate macOS .icns from icon.png
         run: |
-          # O macOS exige uma estrutura específica de tamanhos para o ícone
           mkdir icon.iconset
           sips -z 16 16     icon.png --out icon.iconset/icon_16x16.png
           sips -z 32 32     icon.png --out icon.iconset/icon_16x16@2x.png
@@ -39,15 +44,11 @@ jobs:
           sips -z 512 512   icon.png --out icon.iconset/icon_512x512.png
           cp icon.png       icon.iconset/icon_512x512@2x.png
           
-          # iconutil é o comando nativo do Mac para criar o arquivo .icns
           iconutil -c icns icon.iconset
           rm -rf icon.iconset
 
       - name: Build with PyInstaller
         run: |
-          # --windowed: Abre como app (sem terminal)
-          # --onedir: Cria a pasta .app correta
-          # --icon: Aplica o ícone gerado acima
           pyinstaller --windowed --onedir --clean \
             --name "RocknixManager" \
             --icon "icon.icns" \
@@ -58,8 +59,16 @@ jobs:
           cd dist
           zip -r RocknixManager-macOS.zip RocknixManager.app
 
+      # Isso ainda salva o arquivo na aba Actions (como backup)
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: RocknixManager-Mac-Binary
           path: dist/RocknixManager-macOS.zip
+
+      # ESTE É O PASSO NOVO: Faz o upload direto para a página de Releases
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/') # Só publica no Release se você criar uma versão (tag)
+        with:
+          files: dist/RocknixManager-macOS.zip
