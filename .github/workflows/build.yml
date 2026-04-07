@@ -2,6 +2,11 @@ jobs:
   build-macos:
     runs-on: macos-latest
     steps:
+    - uses: actions/checkout@v4
+  - name: Install Python dependencies
+    run: pip install -r requirements.txt pyinstaller
+  - name: Build MacOS App
+    run: pyinstaller --windowed --onefile --icon=icon.icns rocknix_manager.py
       - uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -16,3 +21,4 @@ jobs:
         with:
           name: RocknixManager-macOS
           path: dist/
+
