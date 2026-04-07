@@ -20,14 +20,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
           pip install pyinstaller
-          # Instala requirements apenas se o arquivo existir no repo
+          # Instala dependências se o arquivo existir
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Generate macOS .icns from icon.png
+      - name: Convert icon.png to macOS .icns
         run: |
-          # Cria a estrutura de ícones em múltiplos tamanhos exigida pela Apple
+          # O macOS exige um conjunto de ícones em tamanhos diferentes
           mkdir icon.iconset
           sips -z 16 16     icon.png --out icon.iconset/icon_16x16.png
           sips -z 32 32     icon.png --out icon.iconset/icon_16x16@2x.png
@@ -40,27 +39,26 @@ jobs:
           sips -z 512 512   icon.png --out icon.iconset/icon_512x512.png
           cp icon.png       icon.iconset/icon_512x512@2x.png
           
-          # Comando nativo do Mac para converter a pasta em arquivo .icns
+          # Transforma a pasta em um arquivo de ícone do Mac
           iconutil -c icns icon.iconset
           rm -rf icon.iconset
 
-      - name: Build with PyInstaller
+      - name: Build App Bundle
         run: |
-          # --windowed: Interface gráfica (GUI)
-          # --onedir: Pasta de aplicativo (padrão Mac)
-          # --icon: Aplica o ícone gerado no passo anterior
+          # --windowed: Interface gráfica (sem terminal atrás)
+          # --onedir: Cria a estrutura .app correta do macOS
           pyinstaller --windowed --onedir --clean \
             --name "RocknixManager" \
             --icon "icon.icns" \
             rocknix_manager.py
 
-      - name: Compress App for Distribution
+      - name: Zip for Release
         run: |
           cd dist
           zip -r RocknixManager-macOS.zip RocknixManager.app
 
-      - name: Upload Artifact
+      - name: Upload Binary
         uses: actions/upload-artifact@v4
         with:
-          name: RocknixManager-Mac-Binary
+          name: RocknixManager-Mac
           path: dist/RocknixManager-macOS.zip
