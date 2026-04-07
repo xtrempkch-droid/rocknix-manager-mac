@@ -11,17 +11,17 @@ from PyQt6.QtWidgets import QApplication, QStyleFactory
 
 import platform
 
-# Se você não tiver nada para fazer especificamente no Mac ainda,
-# você pode usar 'pass' para não dar erro de indentação:
 if platform.system() == "Darwin":
-    pass  # Isso evita o erro de bloco vazio
+    # Aqui precisa de 4 espaços antes do pass
+    pass 
 
 def main():
-    # Seu código principal aqui
-    print("Iniciando Rocknix Manager...")
+    # Aqui também precisa de recuo
+    print("Rocknix Manager para macOS iniciado.")
 
 if __name__ == "__main__":
     main()
+
 def main():
     app = QApplication(sys.argv)
     
