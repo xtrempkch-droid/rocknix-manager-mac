@@ -9,6 +9,10 @@
 import sys
 from PyQt6.QtWidgets import QApplication, QStyleFactory
 
+import platform
+if platform.system() == "Darwin":  # Darwin é o kernel do macOS
+    # Ajustar caminhos de config ou drivers específicos
+
 def main():
     app = QApplication(sys.argv)
     
