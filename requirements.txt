@@ -1,5 +1,1 @@
-customtkinter
-Pillow
-requests
-psutil
 pyinstaller
